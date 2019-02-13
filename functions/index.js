@@ -10,7 +10,7 @@ const app = express()
 
 const collection_configurations_per_api_key = db.collection( 'configurations_per_api_key' )
 
-app.get( '/', ( req, res ) => res.redirect('/api?api_key=generic') )
+app.get( '/', ( req, res ) => res.redirect('/api?api_key=default') )
 
 
 app.get( '/api', async function( req, res ) {
