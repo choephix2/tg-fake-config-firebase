@@ -51,16 +51,20 @@ app.get( '/api/telegramUsers/:user_id/getVerificationCode', ( req, res ) => {
 
 ///
 
-app.get( '/jsonedit/:api_key', ( req, res ) => {
+function echo_jsonedit( req, res ) 
+{
   let api_key = req.params['api_key']
   let ref = collection_configurations_per_api_key.doc( api_key )
   ref.get().then( doc => {
     let json = !doc.exists ? "{}" : doc.data().json
     let data = { json: json, doc : api_key }
-    let html = pug.renderFile( 'edit.pug', data )
+    let html = pug.renderFile( 'jsonedit.pug', data )
     return res.send( html ) 
   } ).catch( e => res.send( e ) )
-} )
+}
+
+app.get( '/jsonedit/:api_key', echo_jsonedit )
+app.get( '/jsonedit', (req,res) => { req.params = req.query; return echo_jsonedit(req,res); } )
 
 app.post( '/set/:api_key', ( req, res ) => {
   let api_key = req.params['api_key']

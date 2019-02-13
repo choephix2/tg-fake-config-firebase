@@ -6,7 +6,7 @@ html(lang='en')
     link(href='https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/5.28.2/jsoneditor.css', rel='stylesheet')
     style().
       * { margin:0; padding:0 }
-      #editor_container { height: 100% }
+      #editor_container { height: 100vh; }
       #toolbar
       {
         position: absolute;
@@ -28,23 +28,29 @@ html(lang='en')
       #toolbar button:hover { color: aqua; }
       #toolbar button:active { color: LightSkyBlue; }
       .jsoneditor-poweredBy { display: none; }
-      #footer 
+      #footer { height: 0; overflow: visible; }
+      #footer p
       { 
         color:#ace;
         font-family:monospace;
         font-size:.75em; 
-        padding: .25em;
+        margin: .25em;
       }
       input[type=checkbox] {
         height: 1em;
         zoom: 200%;
       }
+      div.jsoneditor {
+        border: thin solid SlateGray;
+      }
+      div.jsoneditor-menu {
+        background-color: SlateGray;
+        border-bottom: 1px solid SlateGray;
+      }
   body
     #editor_container
     #toolbar
       button(onclick='onClickSave()') 💾&#xFE0E; Apply
-    #footer
-      p Powered by josdejong/jsoneditor + ACE editor + Google Firebase
 
     script(type='text/javascript').
       var doc = "#{doc}"
@@ -53,7 +59,7 @@ html(lang='en')
       var container = document.getElementById("editor_container")
       var options = {
         history : true,
-        mode : 'tree',
+        mode : 'code',
         modes : ['tree','code'],
         search : false,
         navigationBar : false,
