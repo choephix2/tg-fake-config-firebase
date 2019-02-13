@@ -12,21 +12,36 @@ const collection_configurations_per_api_key = db.collection( 'configurations_per
 
 app.get( '/', ( req, res ) => res.redirect('/api?api_key=generic') )
 
-app.get( '/api', ( req, res ) => {
-  res.setHeader( 'Content-Type', 'application/json' );
-  let api_key = req.query['api_key']
-  if (!api_key) api_key = "default"
-  let collection = collection_configurations_per_api_key
-  let ref_overrides = collection.doc( api_key )
-  ref_overrides.get().then( doc_overrides => {
-    let data_overrides = JSON.parse( doc_overrides.data().json )
-    let base_doc_name = data_overrides.extends ? data_overrides.extends : '_base'
-    let ref_base = collection.doc( base_doc_name )
-    ref_base.get().then( doc_base => {
-      let data_base = JSON.parse( doc_base.data().json )
-      return res.send( Object.assign( data_base, data_overrides ) ) 
-    } ).catch( e => res.send( e ) )
-  } ).catch( e => res.send( e ) )
+    
+async function getConfigData( doc_name )
+{
+  let ref = collection_configurations_per_api_key.doc( doc_name )
+  let doc = await ref.get()
+  let data = doc.data()
+  return data ? JSON.parse( data.json ) : {}
+}
+app.get( '/api', async ( req, res ) => {
+  
+  try
+  {
+    res.setHeader( 'Content-Type', 'application/json' );
+    let api_key = req.query['api_key']
+    if (!api_key) api_key = "default"
+    
+    let datas = []
+    let next_doc_name = api_key
+    
+    while ( next_doc_name )
+    {
+      let data = await getConfigData( next_doc_name )
+      console.log( `got data for ${next_doc_name}`)
+      datas.unshift( data )
+      next_doc_name = data['extends']
+    }
+    
+    return res.send( Object.assign.apply( null, datas ) )
+  }
+  catch( e ) { return res.send( e.name + ': ' + e.message ) }
 } )
 
 app.put( '/api/telegramUsers/:user_id', ( req, res ) => {
