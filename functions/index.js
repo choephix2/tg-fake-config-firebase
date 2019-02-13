@@ -15,14 +15,15 @@ app.get( '/', ( req, res ) => res.redirect('/api?api_key=generic') )
 app.get( '/api', ( req, res ) => {
   res.setHeader( 'Content-Type', 'application/json' );
   let api_key = req.query['api_key']
-  if (!api_key) api_key = "generic"
+  if (!api_key) api_key = "default"
   let collection = collection_configurations_per_api_key
-  let ref_base = collection.doc( '_base' )
   let ref_overrides = collection.doc( api_key )
-  ref_base.get().then( doc_base => {
-    ref_overrides.get().then( doc_overrides => {
+  ref_overrides.get().then( doc_overrides => {
+    let data_overrides = JSON.parse( doc_overrides.data().json )
+    let base_doc_name = data_overrides.extends ? data_overrides.extends : '_base'
+    let ref_base = collection.doc( base_doc_name )
+    ref_base.get().then( doc_base => {
       let data_base = JSON.parse( doc_base.data().json )
-      let data_overrides = JSON.parse( doc_overrides.data().json )
       return res.send( Object.assign( data_base, data_overrides ) ) 
     } ).catch( e => res.send( e ) )
   } ).catch( e => res.send( e ) )
@@ -63,6 +64,12 @@ app.get( '/api/telegramUsers/:user_id/getVerificationCode', ( req, res ) => {
   return res.send( "{}" )
 } )
 
+app.get( '/api/**', ( req, res ) => {
+  res.setHeader( 'Content-Type', 'application/json' );
+  return res.send( "{}" )
+} )
+
+
 ///
 
 function echo_jsonedit( req, res ) 
@@ -76,7 +83,6 @@ function echo_jsonedit( req, res )
     return res.send( html ) 
   } ).catch( e => res.send( e ) )
 }
-
 app.get( '/jsonedit/:api_key', echo_jsonedit )
 app.get( '/jsonedit', (req,res) => { req.params = req.query; return echo_jsonedit(req,res); } )
 
