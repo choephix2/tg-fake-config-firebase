@@ -1,0 +1,1 @@
+# tg-fake-config-firebase
