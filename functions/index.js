@@ -8,14 +8,15 @@ admin.initializeApp( functions.config().firebase )
 const db = admin.firestore()
 const app = express()
 
-console.log("\n\nINITITI\n\n")
+const collection_configurations_per_api_key = db.collection( 'configurations_per_api_key' )
 
 app.get( '/', ( req, res ) => res.redirect('/api?api_key=generic') )
 
 app.get( '/api', ( req, res ) => {
+  res.setHeader( 'Content-Type', 'application/json' );
   let api_key = req.query['api_key']
   if (!api_key) api_key = "generic"
-  let ref = db.collection( 'configurations_per_api_key' ).doc( api_key )
+  let ref = collection_configurations_per_api_key.doc( api_key )
   ref.get().then( doc => {
     let json = !doc.exists ? "{}" : doc.data().json
     return res.send( json ) 
@@ -23,32 +24,36 @@ app.get( '/api', ( req, res ) => {
 } )
 
 app.put( '/api/telegramUsers/:user_id', ( req, res ) => {
+  res.setHeader( 'Content-Type', 'application/json' );
   let user_id = req.params["user_id"]
   let session_key = JSON.parse(req.body)["session_key"]
   console.log(`New session key received for user ${user_id}:\n${session_key}`)
 } )
 
 app.put( '/api/telegramChannels/:api_channel_id', ( req, res ) => {
+  res.setHeader( 'Content-Type', 'application/json' );
   let api_channel_id = req.params["api_channel_id"]
   let data = req.body
   console.log(`New data received for channel ${api_channel_id}:\n${data}`)
 } )
 
 app.get( '/api/telegramUsers/:user_id/requestVerificationCode', ( req, res ) => {
+  res.setHeader( 'Content-Type', 'application/json' );
   console.log(`User ${req.params['user_id']} submitted a request for verification code.`)
   return res.send( "{}" )
 } )
 
 app.get( '/api/telegramUsers/:user_id/getVerificationCode', ( req, res ) => {
+  res.setHeader( 'Content-Type', 'application/json' );
   console.log(`User ${req.params['user_id']} checked for verification code.`)
   return res.send( "{}" )
 } )
 
 ///
 
-app.get( '/edit/:api_key', ( req, res ) => {
+app.get( '/jsonedit/:api_key', ( req, res ) => {
   let api_key = req.params['api_key']
-  let ref = db.collection( 'configurations_per_api_key' ).doc( api_key )
+  let ref = collection_configurations_per_api_key.doc( api_key )
   ref.get().then( doc => {
     let json = !doc.exists ? "{}" : doc.data().json
     let data = { json: json, doc : api_key }
@@ -59,7 +64,7 @@ app.get( '/edit/:api_key', ( req, res ) => {
 
 app.post( '/set/:api_key', ( req, res ) => {
   let api_key = req.params['api_key']
-  let ref = db.collection( 'configurations_per_api_key' ).doc( api_key )
+  let ref = collection_configurations_per_api_key.doc( api_key )
   let json = req.body
   ref.set( { json: json } )
      .then( o => res.send( 'ok' ) )
