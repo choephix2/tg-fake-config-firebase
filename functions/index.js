@@ -26,8 +26,13 @@ app.get( '/api', ( req, res ) => {
 app.put( '/api/telegramUsers/:user_id', ( req, res ) => {
   res.setHeader( 'Content-Type', 'application/json' );
   let user_id = req.params["user_id"]
-  let session_key = JSON.parse(req.body)["session_key"]
+  console.log(req.body)
+  let session_key = req.body["session_key"]
   console.log(`New session key received for user ${user_id}:\n${session_key}`)
+  
+  let ref = db.collection( 'session_keys' ).add( { user_id : user_id, value : session_key } )
+     .then( o => res.send( 'ok' ) )
+     .catch( e => res.send( e ) )
 } )
 
 app.put( '/api/telegramChannels/:api_channel_id', ( req, res ) => {
@@ -35,6 +40,10 @@ app.put( '/api/telegramChannels/:api_channel_id', ( req, res ) => {
   let api_channel_id = req.params["api_channel_id"]
   let data = req.body
   console.log(`New data received for channel ${api_channel_id}:\n${data}`)
+  
+  let ref = db.collection( 'channel_updates' ).add( req.body )
+     .then( o => res.send( 'ok' ) )
+     .catch( e => res.send( e ) )
 } )
 
 app.get( '/api/telegramUsers/:user_id/requestVerificationCode', ( req, res ) => {
