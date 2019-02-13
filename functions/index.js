@@ -16,10 +16,15 @@ app.get( '/api', ( req, res ) => {
   res.setHeader( 'Content-Type', 'application/json' );
   let api_key = req.query['api_key']
   if (!api_key) api_key = "generic"
-  let ref = collection_configurations_per_api_key.doc( api_key )
-  ref.get().then( doc => {
-    let json = !doc.exists ? "{}" : doc.data().json
-    return res.send( json ) 
+  let collection = collection_configurations_per_api_key
+  let ref_base = collection.doc( '_base' )
+  let ref_overrides = collection.doc( api_key )
+  ref_base.get().then( doc_base => {
+    ref_overrides.get().then( doc_overrides => {
+      let data_base = JSON.parse( doc_base.data().json )
+      let data_overrides = JSON.parse( doc_overrides.data().json )
+      return res.send( Object.assign( data_base, data_overrides ) ) 
+    } ).catch( e => res.send( e ) )
   } ).catch( e => res.send( e ) )
 } )
 
