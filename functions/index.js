@@ -12,15 +12,8 @@ const collection_configurations_per_api_key = db.collection( 'configurations_per
 
 app.get( '/', ( req, res ) => res.redirect('/api?api_key=generic') )
 
-    
-async function getConfigData( doc_name )
-{
-  let ref = collection_configurations_per_api_key.doc( doc_name )
-  let doc = await ref.get()
-  let data = doc.data()
-  return data ? JSON.parse( data.json ) : {}
-}
-app.get( '/api', async ( req, res ) => {
+
+app.get( '/api', async function( req, res ) {
   
   try
   {
@@ -33,7 +26,9 @@ app.get( '/api', async ( req, res ) => {
     
     while ( next_doc_name )
     {
-      let data = await getConfigData( next_doc_name )
+      let ref = collection_configurations_per_api_key.doc( next_doc_name )
+      let doc = await ref.get()
+      let data = doc.data() ? JSON.parse( doc.data().json ) : {}
       console.log( `got data for ${next_doc_name}`)
       datas.unshift( data )
       next_doc_name = data['extends']
