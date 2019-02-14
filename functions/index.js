@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const admin = require( 'firebase-admin' )
 const express = require( 'express' )
 const pug = require('pug')
+const deepmerge = require('deepmerge');
 
 admin.initializeApp( functions.config().firebase )
 
@@ -17,9 +18,8 @@ app.get( '/api', async function( req, res ) {
   
   try
   {
-    res.setHeader( 'Content-Type', 'application/json' );
-    let api_key = req.query['api_key']
-    if (!api_key) api_key = "default"
+    res.setHeader( 'Content-Type', 'application/json' )
+    let api_key = req.query['api_key'] || "default"
     
     let datas = []
     let next_doc_name = api_key
@@ -34,7 +34,9 @@ app.get( '/api', async function( req, res ) {
       next_doc_name = data['extends']
     }
     
-    return res.send( Object.assign.apply( null, datas ) )
+    let result = deepmerge.all( datas, { arrayMerge: (a,b)=>b } )
+    delete result.extends
+    return res.send( result )
   }
   catch( e ) { return res.send( e.name + ': ' + e.message ) }
 } )
