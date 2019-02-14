@@ -1,0 +1,25 @@
+doctype html  
+html(lang='en')  
+  head
+    title TG Fake Config Home
+    style().
+      a, a:link, a:visited {
+        font-family: monospace;
+        text-decoration: none;
+        color: #444;
+        transition: color 100ms;
+      }
+      a:hover {
+        color: orange;
+      }
+      a:active {
+        color: skyblue;
+      }
+  body
+    #container
+      h2 AVAILABLE CONFIGS
+      each key in keys
+        p
+          a(href=`/jsonedit/${key}`)= `[edit] `
+          a(href=`/api?api_key${key}`)= ` - ${key}`
+            

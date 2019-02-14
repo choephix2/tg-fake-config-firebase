@@ -11,7 +11,19 @@ const app = express()
 
 const collection_configurations_per_api_key = db.collection( 'configurations_per_api_key' )
 
-app.get( '/', ( req, res ) => res.redirect('/api?api_key=default') )
+// app.get( '/', ( req, res ) => res.redirect('/api?api_key=default') )
+app.get( '/', async function( req, res ) {
+  
+  try
+  {
+    let snapshot = await collection_configurations_per_api_key.get()
+    let data = { keys : [] }
+    snapshot.forEach(doc => data.keys.push(doc.id) )
+    let html = pug.renderFile( 'pug/index.pug', data )
+    return res.send( html ) 
+  }
+  catch( e ) { return res.send( e.name + ': ' + e.message ) }
+} )
 
 
 app.get( '/api', async function( req, res ) {
@@ -91,7 +103,7 @@ function echo_jsonedit( req, res )
   ref.get().then( doc => {
     let json = !doc.exists ? "{}" : doc.data().json
     let data = { json: json, doc : api_key }
-    let html = pug.renderFile( 'jsonedit.pug', data )
+    let html = pug.renderFile( 'pug/jsonedit.pug', data )
     return res.send( html ) 
   } ).catch( e => res.send( e ) )
 }
