@@ -23,13 +23,18 @@ html(lang='en')
         border: none;
         outline: none;
         cursor: pointer;
-        transition: color 50ms;
-        padding: 0 1.5em
+        transition: color 250ms, opacity 250ms;
+        padding: 0 1.5em;
+        opacity: 0;
+        pointer-events: none;
       }
       button#button_save:hover { color: aqua; }
       button#button_save:active { color: LightSkyBlue; }
       button#button_save.saving { pointer-events: none; opacity: .4; }
-      button#button_save:not(.dirty) { display: none; }
+      #editor_container.dirty button#button_save { 
+        pointer-events: initial;
+        opacity: 1;
+      }
       
       .jsoneditor-poweredBy { display: none; }
       #footer { height: 0; overflow: visible; }
@@ -45,11 +50,17 @@ html(lang='en')
         zoom: 200%;
       }
       div.jsoneditor {
-        border: thin solid DarkSlateBlue;
+        border: none;
       }
       div.jsoneditor-menu {
-        background-color: DarkSlateBlue;
-        border-bottom: 1px solid DarkSlateBlue;
+        background-color: #2f2f2f;
+        border-bottom: 1px solid black;
+        transition-property: background-color, border-color;
+        transition-duration: 250ms;
+      }
+      .dirty div.jsoneditor-menu {
+        background-color: Purple;
+        border-bottom: 1px solid Purple;
       }
   body
     #editor_container
@@ -58,8 +69,7 @@ html(lang='en')
 
     script(type='text/javascript').
       var doc = "#{doc}"
-      var json = `!{json}`
-
+      var original_json = `!{json}`
       var container = document.getElementById("editor_container")
       var options = {
         history : true,
@@ -70,13 +80,18 @@ html(lang='en')
         statusBar : false,
         enableSort : false,
         onChange : (...rest) => {
-          button_save.classList.add("dirty")
+          var dirty = original_json != editor.getText()
+          if ( dirty )
+            container.classList.add("dirty")
+          else 
+            container.classList.remove("dirty")
           if ( editor.mode != "code" )
             onClickSave()
         }
       }
       var editor = new JSONEditor(container, options)
-      editor.set( JSON.parse(json) )
+      
+      editor.set( JSON.parse(original_json) )
   
       var button_save = document.getElementById("button_save")
       function onClickSave() {
@@ -89,7 +104,8 @@ html(lang='en')
           if ( !Http.responseText ) return;
           console.log( Http.responseText)
           button_save.classList.remove("saving")
-          button_save.classList.remove("dirty")
+          container.classList.remove("dirty")
+          original_json = json
         }
         button_save.classList.add("saving")
       }

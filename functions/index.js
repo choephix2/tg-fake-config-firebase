@@ -10,8 +10,8 @@ const db = admin.firestore()
 const app = express()
 
 const collection_configurations_per_api_key = db.collection( 'configurations_per_api_key' )
+const doc_api_key_aliases = db.collection( 'settings' ).doc( "api_key_aliases" )
 
-// app.get( '/', ( req, res ) => res.redirect('/api?api_key=default') )
 app.get( '/', async function( req, res ) {
   
   try
@@ -32,6 +32,10 @@ app.get( '/api', async function( req, res ) {
   {
     res.setHeader( 'Content-Type', 'application/json' )
     let api_key = req.query['api_key'] || "default"
+    
+    let api_key_aliases = ( await doc_api_key_aliases.get() ).data()
+    if ( api_key in api_key_aliases )
+      api_key = api_key_aliases[ api_key ]
     
     let datas = []
     let next_doc_name = api_key
