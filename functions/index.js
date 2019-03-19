@@ -13,7 +13,6 @@ const collection_configurations_per_api_key = db.collection( 'configurations_per
 const doc_api_key_aliases = db.collection( 'settings' ).doc( "api_key_aliases" )
 
 app.get( '/', async function( req, res ) {
-  
   try
   {
     let snapshot = await collection_configurations_per_api_key.get()
@@ -27,7 +26,6 @@ app.get( '/', async function( req, res ) {
 
 
 app.get( '/api', async function( req, res ) {
-  
   try
   {
     res.setHeader( 'Content-Type', 'application/json' )

@@ -25,13 +25,13 @@ html(lang='en')
         cursor: pointer;
         transition: color 250ms, opacity 250ms;
         padding: 0 1.5em;
-        opacity: 0;
-        pointer-events: none;
+        opacity: .1;
+        // pointer-events: none;
       }
       button#button_save:hover { color: aqua; }
       button#button_save:active { color: LightSkyBlue; }
       button#button_save.saving { pointer-events: none; opacity: .4; }
-      #editor_container.dirty button#button_save { 
+      button#button_save.dirty { 
         pointer-events: initial;
         opacity: 1;
       }
@@ -71,6 +71,8 @@ html(lang='en')
       var doc = "#{doc}"
       var original_json = `!{json}`
       var container = document.getElementById("editor_container")
+      var button_save = document.getElementById("button_save")
+      
       var options = {
         history : true,
         mode : 'code',
@@ -82,9 +84,15 @@ html(lang='en')
         onChange : (...rest) => {
           var dirty = original_json != editor.getText()
           if ( dirty )
+          {
             container.classList.add("dirty")
-          else 
+            button_save.classList.add("dirty")
+          }
+          ele 
+          {
             container.classList.remove("dirty")
+            button_save.classList.remove("dirty")
+          }
           if ( editor.mode != "code" )
             onClickSave()
         }
@@ -93,7 +101,6 @@ html(lang='en')
       
       editor.set( JSON.parse(original_json) )
   
-      var button_save = document.getElementById("button_save")
       function onClickSave() {
         const json = editor.getText()
         const Http = new XMLHttpRequest();
@@ -104,6 +111,7 @@ html(lang='en')
           if ( !Http.responseText ) return;
           console.log( Http.responseText)
           button_save.classList.remove("saving")
+          button_save.classList.remove("dirty")
           container.classList.remove("dirty")
           original_json = json
         }
